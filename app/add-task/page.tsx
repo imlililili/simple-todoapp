@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { addTodo } from "@/api";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function AddTaskPage() {
     const router = useRouter();
@@ -29,19 +31,10 @@ export default function AddTaskPage() {
             <h1 className="text-2xl font-bold mb-6">Add New Task</h1>
 
             <form onSubmit={handleSubmitNewTodo} className="flex flex-col gap-4 w-80">
-                <input
-                    type="text"
-                    placeholder="Task title"
-                    value={newTaskValue}
-                    onChange={(e)=> setNewTaskValue(e.target.value)}
-                    className="border border-gray-300 rounded px-3 py-2"
-                />
-                <button
-                    type="submit"
-                    className="btn"
-                >
+                <Input type="text" placeholder="Task" value={newTaskValue} onChange={(e)=> setNewTaskValue(e.target.value)} />
+                <Button type="submit" variant="outline">
                     Save
-                </button>
+                </Button>
             </form>
 
             <button
