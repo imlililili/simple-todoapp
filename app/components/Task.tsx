@@ -20,12 +20,14 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
   const [modalOpenEdit, setModalOpenEdit] = useState<boolean>(false);
   const [modalOpenDeleted, setModalOpenDeleted] = useState<boolean>(false);
   const [taskToEdit, setTaskToEdit] = useState<string>(task.text);
+  const [descriptionToEdit, setDescriptionToEdit] = useState<string>(task.description);
 
   const handleSubmitEditTodo: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await editTodo({
             id: task.id,
-            text: taskToEdit
+            text: taskToEdit,
+            description: descriptionToEdit
         });
         setModalOpenEdit(false);
         router.refresh();
@@ -37,8 +39,9 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
     router.refresh();
   }
   return <TableRow key={task.id}>
-            <TableCell className="w-full">{task.text}</TableCell>   
-            <TableCell className="flex gap-5">
+            <TableCell className="w-[30%] text-left">{task.text}</TableCell>
+            <TableCell className="w-[50%] text-left">{task.description}</TableCell>   
+            <TableCell className="flex gap-4">
               <FiEdit onClick={() => setModalOpenEdit(true)} cursor="pointer" className="text-blue-500" size={25}/>
               <Modal modalOpen={modalOpenEdit} setModalOpen={setModalOpenEdit}>
                   <Form onSubmit={handleSubmitEditTodo}>
@@ -47,6 +50,12 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
                           <Input 
                           value={taskToEdit}
                           onChange={(e)=> setTaskToEdit(e.target.value)}
+                          type="text" 
+                          placeholder="Type here"/>
+                          <br/>
+                          <Input 
+                          value={descriptionToEdit}
+                          onChange={(e)=> setDescriptionToEdit(e.target.value)}
                           type="text" 
                           placeholder="Type here"/>
                           <Button type="submit" className="btn">Submit</Button>

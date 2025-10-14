@@ -52,6 +52,7 @@ export default function AddTaskPage() {
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-80">
                 <Input {...register("task", {required: "Task title is required"})} type="text" placeholder="Task"  />
+                {errors.task && <p className="text-red-500">{errors.task.message}</p>}
                 <Input {...register("description")} type="text" placeholder="Description"  />
                 <Button type="submit" variant="outline">
                     Save

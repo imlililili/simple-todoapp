@@ -2,15 +2,18 @@
   "tasks": [
     {
       "id": "1",
-      "text": "buy milk with some orange juice"
+      "text": "wws",
+      "description": "buy milk"
     },
     {
       "id": "3",
-      "text": "help grandma"
+      "text": "help grandma",
+      "description": "buy another grandma"
     },
     {
       "id": "5",
-      "text": "free chicken"
+      "text": "free chicken",
+      "description": "free shoes"
     },
     {
       "id": "83a4ba19-4cd7-44a6-a35a-b51ab35c4667",
@@ -31,10 +34,6 @@
     {
       "id": "b00fa976-eb84-4358-92f4-03aad761c4b0",
       "text": "plant monkey"
-    },
-    {
-      "id": "e3e21b6e-f492-4698-9ad4-e83a900597d2",
-      "text": "??"
     },
     {
       "id": "33a439ea-f506-4fa0-a3ba-8a954e4ac302",
