@@ -9,7 +9,9 @@ import { useRouter } from "next/navigation";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { FieldValue, FieldValues, useForm } from "react-hook-form";
 import Form from "next/form";
+import { Textarea } from "@/components/ui/textarea";
 
 interface TaskProps {
     task: ITask
@@ -22,6 +24,18 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
   const [taskToEdit, setTaskToEdit] = useState<string>(task.text);
   const [descriptionToEdit, setDescriptionToEdit] = useState<string>(task.description);
 
+  // const { register,
+  //         handleSubmit,
+  //         formState: { errors, isSubmitting },
+  //       } = useForm<ITask>();
+  // const onSubmit = async (data: FieldValues) => {
+  //       await addTodo({   
+  //           id: uuidv4(),
+  //           text: data.task,
+  //           description: data.description
+  //       });
+  //       router.push("/");
+  //   }
   const handleSubmitEditTodo: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault();
         await editTodo({
@@ -43,6 +57,15 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
             <TableCell className="w-[50%] text-left">{task.description}</TableCell>   
             <TableCell className="flex gap-4">
               <FiEdit onClick={() => setModalOpenEdit(true)} cursor="pointer" className="text-blue-500" size={25}/>
+                {/* reference from add-task/page.tsx
+                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-80">
+                <Input {...register("task", {required: "Task title is required"})} type="text" placeholder="Task"  />
+                {errors.task && <p className="text-red-500">{errors.task.message}</p>}
+                <Input {...register("description")} type="text" placeholder="Description"  />
+                <Button type="submit" variant="outline">
+                    Save
+                </Button>
+            </form> */}
               <Modal modalOpen={modalOpenEdit} setModalOpen={setModalOpenEdit}>
                   <Form onSubmit={handleSubmitEditTodo}>
                       <h3 className="font-bold text-lg">Edit task</h3>
@@ -53,10 +76,9 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
                           type="text" 
                           placeholder="Type here"/>
                           <br/>
-                          <Input 
+                          <Textarea
                           value={descriptionToEdit}
                           onChange={(e)=> setDescriptionToEdit(e.target.value)}
-                          type="text" 
                           placeholder="Type here"/>
                           <Button type="submit" className="btn">Submit</Button>
                       </div>
