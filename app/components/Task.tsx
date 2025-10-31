@@ -4,6 +4,7 @@ import { ITask } from "@/types/tasks";
 import Modal from "./Modal";
 import { FormEventHandler, useState } from "react";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { v4 as uuidv4 } from "uuid";
 import { deleteTodo, editTodo } from "@/api";
 import { useRouter } from "next/navigation";
 import { TableCell, TableRow } from "@/components/ui/table";
@@ -24,28 +25,19 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
   const [taskToEdit, setTaskToEdit] = useState<string>(task.text);
   const [descriptionToEdit, setDescriptionToEdit] = useState<string>(task.description);
 
-  // const { register,
-  //         handleSubmit,
-  //         formState: { errors, isSubmitting },
-  //       } = useForm<ITask>();
-  // const onSubmit = async (data: FieldValues) => {
-  //       await addTodo({   
-  //           id: uuidv4(),
-  //           text: data.task,
-  //           description: data.description
-  //       });
-  //       router.push("/");
-  //   }
-  const handleSubmitEditTodo: FormEventHandler<HTMLFormElement> = async (e) => {
-        e.preventDefault();
-        await editTodo({
+  const { register,
+          handleSubmit,
+          formState: { errors, isSubmitting },
+        } = useForm<ITask>();
+  const onSubmit = async (data: FieldValues) => {
+        await editTodo({   
             id: task.id,
-            text: taskToEdit,
-            description: descriptionToEdit
+            text: data.task,
+            description: data.description
         });
         setModalOpenEdit(false);
         router.refresh();
-    };
+    }
   
   const handleDeleteTask = async (id: string) => {
     await deleteTodo(id);
@@ -57,32 +49,19 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
             <TableCell className="w-[50%] text-left">{task.description}</TableCell>   
             <TableCell className="flex gap-4">
               <FiEdit onClick={() => setModalOpenEdit(true)} cursor="pointer" className="text-blue-500" size={25}/>
-                {/* reference from add-task/page.tsx
-                <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-80">
-                <Input {...register("task", {required: "Task title is required"})} type="text" placeholder="Task"  />
-                {errors.task && <p className="text-red-500">{errors.task.message}</p>}
-                <Input {...register("description")} type="text" placeholder="Description"  />
-                <Button type="submit" variant="outline">
-                    Save
-                </Button>
-            </form> */}
               <Modal modalOpen={modalOpenEdit} setModalOpen={setModalOpenEdit}>
-                  <Form onSubmit={handleSubmitEditTodo}>
+                  <form onSubmit={handleSubmit(onSubmit)}>
                       <h3 className="font-bold text-lg">Edit task</h3>
                       <div className="modal-action">
-                          <Input 
-                          value={taskToEdit}
-                          onChange={(e)=> setTaskToEdit(e.target.value)}
+                          <Input {...register("task")}
                           type="text" 
                           placeholder="Type here"/>
                           <br/>
-                          <Textarea
-                          value={descriptionToEdit}
-                          onChange={(e)=> setDescriptionToEdit(e.target.value)}
+                          <Textarea {...register("description")}
                           placeholder="Type here"/>
                           <Button type="submit" className="btn">Submit</Button>
                       </div>
-                  </Form>
+                  </form>
               </Modal>
               <FiTrash2 onClick={() => setModalOpenDeleted(true)} cursor="pointer" className="text-red-500"size={25}/>
               <Modal modalOpen={modalOpenDeleted} setModalOpen={setModalOpenDeleted}>
