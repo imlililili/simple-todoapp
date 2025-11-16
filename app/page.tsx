@@ -1,10 +1,13 @@
-import { getAllTodos } from "@/api";
+"use client";
+
 import AddTask from "./components/AddTask";
 import TodoList from "./components/TodoList";
+import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import createTodoQueryOptions from "./queryOptions/createTodoQueryOptions";
 
-export default async function Home() {
-  const tasks = await getAllTodos();
-  console.log(tasks);
+export default function Home() {
+  const { data: tasks = []} = useSuspenseQuery(createTodoQueryOptions());
+
   return (
     <main className="max-w-4xl mx-auto mt-4">
       <div className="text-center my-5 flex flex-col gap-4">
@@ -14,4 +17,4 @@ export default async function Home() {
       <TodoList tasks={tasks}/>
     </main>
   );
-}
+};

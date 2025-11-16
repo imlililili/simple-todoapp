@@ -8,44 +8,36 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FieldValue, FieldValues, useForm } from "react-hook-form";
 import { ITask } from "@/types/tasks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface TaskProps {
     task: ITask
 }
 
 export default function AddTaskPage() {
+
     const { register,
         handleSubmit,
         formState: { errors, isSubmitting },
       } = useForm<ITask>();
 
     const router = useRouter();
-    // const [newTaskValue, setNewTaskValue] = useState<string>("");
-
-    // const handleSubmitNewTodo = async (e) => {
-        
-    //     e.preventDefault();
-    //     if (!newTaskValue.trim()) { // Prevent adding empty tasks
-    //         alert("Please enter a task title!");
-    //         return;
-    //     }
-    //     await addTodo({
-    //         id: uuidv4(),
-    //         text: newTaskValue
-    //     });
-    //     setNewTaskValue("");
-    //     router.push("/");
-    // };
-
-
-    const onSubmit = async (data: FieldValues) => {
-        await addTodo({   
+    const queryClient = useQueryClient();
+    const { mutate, isPending, error} = useMutation({
+        mutationKey: ["todo", "create"],
+        mutationFn: async (data: ITask)=> addTodo({
             id: uuidv4(),
             text: data.task,
             description: data.description
-        });
-        router.push("/");
-    }
+        }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey:["todos"]});
+            // reset();
+            router.push("/")
+
+        }
+    })
+    const onSubmit = (data: ITask) => mutate(data);
     return (
         <main className="flex flex-col items-center justify-center min-h-screen p-4">
             <h1 className="text-2xl font-bold mb-6">Add New Task</h1>
@@ -54,8 +46,8 @@ export default function AddTaskPage() {
                 <Input {...register("task", {required: "Task title is required"})} type="text" placeholder="Task"  />
                 {errors.task && <p className="text-red-500">{errors.task.message}</p>}
                 <Input {...register("description")} type="text" placeholder="Description"  />
-                <Button type="submit" variant="outline">
-                    Save
+                <Button type="submit" variant="outline" disabled = {isPending}>
+                    {isPending ? "Saving..." : "Save"}
                 </Button>
             </form>
 
