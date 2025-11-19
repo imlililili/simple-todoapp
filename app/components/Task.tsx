@@ -15,6 +15,8 @@ import Form from "next/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import editMutation from "./editMutation";
+import { deleteMutation } from "./deleteMutation";
 
 interface TaskProps {
     task: ITask
@@ -22,7 +24,6 @@ interface TaskProps {
 
 const Task: React.FC<TaskProps> = ( { task } ) => {
   const router = useRouter();
-  const queryClient = useQueryClient();
   const [modalOpenEdit, setModalOpenEdit] = useState<boolean>(false);
   const [modalOpenDeleted, setModalOpenDeleted] = useState<boolean>(false);
 
@@ -31,63 +32,22 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
           formState: { errors },
         } = useForm<ITask>();
 
-  const editMutation = useMutation({
-  mutationKey: ["todo", "edit", task.id],
-  mutationFn: (data: FormData) =>
-    editTodo({ 
-      id: task.id,
-      text: data.task,
-      description: data.description
-    }),
-  onMutate: async (data) => {
-    await queryClient.cancelQueries({ queryKey: ["todos"] });
-    const prev = queryClient.getQueryData<ITask[]>(["todos"]);
-    queryClient.setQueryData<ITask[]>(["todos"], (old = []) =>
-      old.map((t) => (t.id === task.id ? { ...t, text: data.task, description: data.description ?? "" } : t))
-    );
-    return { prev };
-  },
-  onError: (_e, _v, ctx) => {
-    if (ctx?.prev) queryClient.setQueryData(["todos"], ctx.prev);
-  },
-  // cover prev dataa
-  onSuccess: (updated) => {
-    queryClient.setQueryData<ITask[]>(["todos"], (old = []) =>
-      old.map((t) => (t.id === task.id ? { ...t, ...updated } : t))
-    );
-    setModalOpenEdit(false);
-  },
-  onSettled: () => {
-    queryClient.invalidateQueries({ queryKey: ["todos"] });
-  },
-});
-
-
-  const onSubmit = (data: ITask) => {
-    editMutation.mutate(data);
+  const { mutate: editTodoMate, isPending: isSaving } = editMutation();
+  function onSubmit(data: ITask) {
+    editTodoMate({
+        id: task.id,
+        text: data.task,
+        description: data.description,
+      }, {
+      onSuccess: () => {
+        setModalOpenEdit(false);
+        router.refresh();
+      },
+    });
   }
-  
-  const deleteMutation = useMutation({
-    mutationKey: ["todo", "delete", task.id],
-    mutationFn: (id: string) => deleteTodo(id),
-    onMutate: async (id) => {
-      await queryClient.cancelQueries({ queryKey: ["todos"] });
-      const prev = queryClient.getQueryData<ITask[]>(["todos"]);
 
-      queryClient.setQueryData<ITask[]>(["todos"], (old = []) => old.filter((t) => t.id !== id));
+const { mutate: deleteTodoMutate, isPending: isDeleting } = deleteMutation();
 
-      return { prev };
-    },
-    onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) queryClient.setQueryData(["todos"], ctx.prev);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
-    },
-    onSuccess: () => {
-      setModalOpenDeleted(false);
-    },
-  });
   return <TableRow key={task.id}>
             <TableCell className="w-[30%] text-left">{task.text}</TableCell>
             <TableCell className="w-[50%] text-left">{task.description}</TableCell>   
@@ -117,9 +77,16 @@ const Task: React.FC<TaskProps> = ( { task } ) => {
                 <h3 className="text-lg">Are you sure, you want to delete this task?</h3>
                 <div className="modal-action">
                   <Button
-                    onClick={() =>  deleteMutation.mutate(task.id)}
-              disabled={deleteMutation.isPending}
-                  >Yes</Button>
+                    type="button"
+                    onClick={() =>
+                      deleteTodoMutate(task.id, {
+                        onSuccess: () => setModalOpenDeleted(false),
+                      })
+                    }
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Deleting..." : "Yes"}
+                  </Button>
                 </div>
               </Modal>
             </TableCell>

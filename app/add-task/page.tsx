@@ -1,43 +1,36 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { addTodo } from "@/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FieldValue, FieldValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { ITask } from "@/types/tasks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-
-interface TaskProps {
-    task: ITask
-}
+import { addTaskMutation } from "./addTaskMutation";
 
 export default function AddTaskPage() {
 
+    const router = useRouter(); 
     const { register,
         handleSubmit,
         formState: { errors, isSubmitting },
       } = useForm<ITask>();
-
-    const router = useRouter();
-    const queryClient = useQueryClient();
-    const { mutate, isPending, error} = useMutation({
-        mutationKey: ["todo", "create"],
-        mutationFn: async (data: ITask)=> addTodo({
+    
+    const { mutate, isPending, error} = addTaskMutation();
+    const onSubmit = (data: ITask) => {
+        const newTask: ITask = {
             id: uuidv4(),
             text: data.task,
-            description: data.description
-        }),
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey:["todos"]});
-            // reset();
-            router.push("/")
+            description: data.description || "",
+        };
+        mutate(newTask, {
+            onSuccess: () => {
+                router.push("/");
+            },
+        });
 
-        }
-    })
-    const onSubmit = (data: ITask) => mutate(data);
+    }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen p-4">
             <h1 className="text-2xl font-bold mb-6">Add New Task</h1>
