@@ -1,50 +1,35 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import { addTodo } from "@/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FieldValue, FieldValues, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { ITask } from "@/types/tasks";
-
-interface TaskProps {
-    task: ITask
-}
+import { addTaskMutation } from "./addTaskMutation";
 
 export default function AddTaskPage() {
+
+    const router = useRouter(); 
     const { register,
         handleSubmit,
         formState: { errors, isSubmitting },
       } = useForm<ITask>();
-
-    const router = useRouter();
-    // const [newTaskValue, setNewTaskValue] = useState<string>("");
-
-    // const handleSubmitNewTodo = async (e) => {
-        
-    //     e.preventDefault();
-    //     if (!newTaskValue.trim()) { // Prevent adding empty tasks
-    //         alert("Please enter a task title!");
-    //         return;
-    //     }
-    //     await addTodo({
-    //         id: uuidv4(),
-    //         text: newTaskValue
-    //     });
-    //     setNewTaskValue("");
-    //     router.push("/");
-    // };
-
-
-    const onSubmit = async (data: FieldValues) => {
-        await addTodo({   
+    
+    const { mutate, isPending, error} = addTaskMutation();
+    const onSubmit = (data: ITask) => {
+        const newTask: ITask = {
             id: uuidv4(),
             text: data.task,
-            description: data.description
+            description: data.description || "",
+        };
+        mutate(newTask, {
+            onSuccess: () => {
+                router.push("/");
+            },
         });
-        router.push("/");
+
     }
     return (
         <main className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -54,8 +39,8 @@ export default function AddTaskPage() {
                 <Input {...register("task", {required: "Task title is required"})} type="text" placeholder="Task"  />
                 {errors.task && <p className="text-red-500">{errors.task.message}</p>}
                 <Input {...register("description")} type="text" placeholder="Description"  />
-                <Button type="submit" variant="outline">
-                    Save
+                <Button type="submit" variant="outline" disabled = {isPending}>
+                    {isPending ? "Saving..." : "Save"}
                 </Button>
             </form>
 

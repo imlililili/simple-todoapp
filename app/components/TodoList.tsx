@@ -1,12 +1,18 @@
 import { ITask } from "@/types/tasks";
 import Task from "./Task";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useQuery } from "@tanstack/react-query";
+import createTodoQueryOptions from "../queryOptions/createTodoQueryOptions";
+import { getAllTodos } from "@/api";
 
 interface TodoListProps {
     tasks: ITask[]
 }
 
-const TodoList: React.FC<TodoListProps> = ({ tasks }) => {
+const TodoList: React.FC<TodoListProps> = () => {
+    const { data: todos = [], isPending } = useQuery(createTodoQueryOptions());
+
+    if (isPending) return <div>Loading…</div>;
     return <div className="overflow-x-auto">
         <Table>
             <TableHeader>
@@ -17,9 +23,7 @@ const TodoList: React.FC<TodoListProps> = ({ tasks }) => {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {tasks.map((task) => (
-                    <Task key={task.id} task={task}/>
-                ))}
+                {todos.map((t) => <Task key={t.id} task={t} />)}
             </TableBody>
         </Table>
     </div>;
